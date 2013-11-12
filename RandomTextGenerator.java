@@ -1,0 +1,1 @@
+// a RandomTextGenerator class
