@@ -4,13 +4,22 @@
 // CS 455 PA1
 // Fall 2013
 
+/*
+1.update our prefix, if we can update and return turn,
+  if can't return false.
+2.construct Prefix
+**/
+
 public class Prefix {
-	//constructor, random in text.
-	public Prefix() {
+	//constructor, if the setup == 1, build the first sequence
+	//of prefix from the text in order to build map; if setup == 0
+	//build a random prefix from the text.
+	public Prefix(int prefixLength, ArrayList<String> text, int setup) {
 
 	}
-	//constructor
-	public Prefix(LinkedList<String> wordsInPrefix) {
+
+	//default constructor
+	public Prefix() {
 
 	}
 
@@ -18,11 +27,10 @@ public class Prefix {
 	//not in previous situations, merge the next word, drop the first
 	//word
 	public void updatePrefix(String nextWord) {
-		assert !nextWord.equal("end of file");
 		currentPrefix.addLast(nextWord);
 		currentPrefix.removeFirst();
 	}
 
-	private Random generator = new Random();
+	private int prefixLength;
 	private LinkedList<String> currentPrefix = new LinkedList<String>();
 }

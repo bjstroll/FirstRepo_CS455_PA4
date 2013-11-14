@@ -4,83 +4,70 @@
 // CS 455 PA1
 // Fall 2013
 
+/*
+	1.read in text
+	2.organize a map based on text
+	3.look up and return the next word
+
+**/
 
 public class RandomTextGenerator {
 
 	//constructor
 	public RandomTextGenerator() {
-		text = new ArrayList<String>();
 		searchMap = new HashMap<Prefix, ArrayList<String>>();
 		prefixLength = 1;
-		sourceFileName = "";
+		currentPrefix = new Prefix();
 	}
 
 	//constructor
-	public RandomTextGenerator(int prefixLength, String sourceFileName) {
-		text = new ArrayList<String>();
+	public RandomTextGenerator(int prefixLength, ArrayList<String> text) {
 		searchMap = new Hashmap<Prefix, ArrayList<String>>();
 		this.prefixLength = prefixLength;
-		this.sourceFileName = sourceFileName;
+		currentPrefix = new Prefix(prefixLength, text, RANDOM);
+		this.textToHashmap(text);
 	}
 	
+
 	//According to the prefixLength, we cut the text and generate
 	//a Hashmap with prefixes as Keyset. 
-	public void textToHashmap() {
-		for (int i = 0; i <= (text.length() - prefixLength); i++) {
-			LinkedList<String> currPrefix = new LinkedList<String>();
-			int j = 0;
-			while (j < prefixLength) {
-				currPrefix.addLast(text.get(j + i));
-				j++;
-			}
-			Prefix tempPrefix = new Prefix(currPrefix);
+	//precondiction: text.length >= prefixLength + 1;
+	public void textToHashmap(ArrayList<String> text) {
+		Prefix setupPrefix = new Prefix(prefixLength, text, SETUP);
+
+		for (int i = prefixLength; i <= text.size(); i++ ) {
 			String nextWord;
-			if ((i + j) == text.length()) {
+			if (i < text.size()) {
+				nextWord = text.get(i);
+			}
+			else {
 				nextWord = "end of file";
 			}
-			else {
-				nextWord = text.get(i + j);
-			}
-			if (searchMap.get(tempPrefix) == null) {
+
+			if (searchMap.get(setupPrefix) == null) {
 				ArrayList<String> newValue = new ArrayList<String>();
 				newValue.add(nextWord);
-				searchMap.put(tempPrefix, newValue)
+				searchMap.put(tempPrefix, newValue);
 			}
 			else {
-				searchMap.put(tempPrefix,searchMap.get(tempPrefix).add(nextWord));
+				searchMap.put(tempPrefix, searchMap.get(tempPrefix).add(nextWord));	
 			}
+
+			setupPrefix.update(nextWord);
 		}
+
+
 	}
 	
-	//read text into ArrayList text;
-	public void readInText() {
-		File sourceFile = new File(sourceFileName);
-		Scanner in = new Scanner(sourceFile);//exception handler needed
-		while (in.hasNext()) {
-			text.add(in.next());
-		}
-	}
-	
-	public String lookup(Prefix currentPrefix, TextProcessor textPro) {
-		ArrayList<String> currValue = textPro.searchMap.get(currentPrefix);//what if get null
-		int indexWords = generator.nextInt(currValue.size());
-		String nextWord = currValue.get(indexWords);
-		while (nextWord.equal("end of file")) {
-			
-			// currentPrefix.randomPrefix(textPro);
-			
-			currValue = textPro.searchMap.get(currentPrefix);//what if get null
-			indexWords = generator.nextInt(currValue.size());
-			nextWord = currValue.get(indexWords);			
-		}
-		currentPrefix.updatePrefix(nextWord);
-		return nextWord;
+	//look up current prefix,return the next word based on probability,
+	//construct a new prefix if we reach the end of file.
+	public String generate(ArrayList<String> text) {
+		currentPrefix = 
 	}
 
 	private Random generator = new Random(); 
-	private int prefixLength;
-	private ArrayList<String> text;
+	private int prefixLength;//do I really need to save this?
+	private Prefix currentPrefix;
 	private Map<Prefix, ArrayList<String>> searchMap;
-	private String sourceFileName;
 
 }
