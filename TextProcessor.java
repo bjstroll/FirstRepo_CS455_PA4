@@ -1,14 +1,12 @@
-// a RandomTextGenerator class
 // Name: Yinzi Bao
 // USC loginid: yinzibao@usc.edu
 // CS 455 PA1
 // Fall 2013
 
 
-public class RandomTextGenerator {
-
+public class TextProcessor {
 	//constructor
-	public RandomTextGenerator() {
+	public TextProcessor() {
 		text = new ArrayList<String>();
 		searchMap = new HashMap<Prefix, ArrayList<String>>();
 		prefixLength = 1;
@@ -16,7 +14,7 @@ public class RandomTextGenerator {
 	}
 
 	//constructor
-	public RandomTextGenerator(int prefixLength, String sourceFileName) {
+	public TextProcessor(int prefixLength, String sourceFileName) {
 		text = new ArrayList<String>();
 		searchMap = new Hashmap<Prefix, ArrayList<String>>();
 		this.prefixLength = prefixLength;
@@ -60,27 +58,9 @@ public class RandomTextGenerator {
 			text.add(in.next());
 		}
 	}
-	
-	public String lookup(Prefix currentPrefix, TextProcessor textPro) {
-		ArrayList<String> currValue = textPro.searchMap.get(currentPrefix);//what if get null
-		int indexWords = generator.nextInt(currValue.size());
-		String nextWord = currValue.get(indexWords);
-		while (nextWord.equal("end of file")) {
-			
-			// currentPrefix.randomPrefix(textPro);
-			
-			currValue = textPro.searchMap.get(currentPrefix);//what if get null
-			indexWords = generator.nextInt(currValue.size());
-			nextWord = currValue.get(indexWords);			
-		}
-		currentPrefix.updatePrefix(nextWord);
-		return nextWord;
-	}
 
-	private Random generator = new Random(); 
 	private int prefixLength;
 	private ArrayList<String> text;
 	private Map<Prefix, ArrayList<String>> searchMap;
 	private String sourceFileName;
-
 }
