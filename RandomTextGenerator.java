@@ -24,7 +24,7 @@ public class RandomTextGenerator {
 	public RandomTextGenerator(int prefixLength, ArrayList<String> text) {
 		searchMap = new Hashmap<Prefix, ArrayList<String>>();
 		this.prefixLength = prefixLength;
-		currentPrefix = new Prefix(prefixLength, text, RANDOM);
+		currentPrefix = new Prefix(prefixLength, text, RANDOM_MODE);
 		this.textToHashmap(text);
 	}
 	
@@ -33,7 +33,7 @@ public class RandomTextGenerator {
 	//a Hashmap with prefixes as Keyset. 
 	//precondiction: text.length >= prefixLength + 1;
 	public void textToHashmap(ArrayList<String> text) {
-		Prefix setupPrefix = new Prefix(prefixLength, text, SETUP);
+		Prefix setupPrefix = new Prefix(prefixLength, text, SETUP_MODE);
 
 		for (int i = prefixLength; i <= text.size(); i++ ) {
 			String nextWord;
@@ -53,7 +53,7 @@ public class RandomTextGenerator {
 				searchMap.put(tempPrefix, searchMap.get(tempPrefix).add(nextWord));	
 			}
 
-			setupPrefix.update(nextWord);
+			setupPrefix = setupPrefix.updatePrefix(nextWord);
 		}
 
 
@@ -62,8 +62,28 @@ public class RandomTextGenerator {
 	//look up current prefix,return the next word based on probability,
 	//construct a new prefix if we reach the end of file.
 	public String generate(ArrayList<String> text) {
-		currentPrefix = 
+		String nextWord;
+		if (searchMap.get(currentPrefix) == null) {
+			//Error how to make sure that our prefix is 100% in the text?
+		}
+		else {
+			nextWordsArray = searchMap.get(currentPrefix);
+			int indexNext = generator.nextInt(nextWordsArray.size());
+			nextWord = nextWordsArray.get(indexNext);
+			
+			while (nextWord.equals("end of file")) {
+				currentPrefix = new Prefix(prefixLength, text, RANDOM);
+				nextWordsArray = searchMap.get(currentPrefix);
+				int indexNext = generator.nextInt(nextWordsArray.size());
+				nextWord = nextWordsArray.get(indexNext);
+			}
+			currentPrefix = currentPrefix.updatePrefix(nextWord);
+		}
+		return nextWord;
 	}
+
+	//I am consider can I use a keySet to find another? if we do so, when 
+	//we generate a prefix, it won't be of the probability in the text. 
 
 	private Random generator = new Random(); 
 	private int prefixLength;//do I really need to save this?
