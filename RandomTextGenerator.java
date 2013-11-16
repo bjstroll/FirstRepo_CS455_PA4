@@ -11,6 +11,11 @@
 
 **/
 
+import java.util.ArrayList;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Random;
+
 public class RandomTextGenerator {
 
 	//constructor
@@ -18,14 +23,19 @@ public class RandomTextGenerator {
 		searchMap = new HashMap<Prefix, ArrayList<String>>();
 		prefixLength = 1;
 		currentPrefix = new Prefix();
+		generator = new Random();
 	}
 
 	//constructor
 	public RandomTextGenerator(int prefixLength, ArrayList<String> text) {
-		searchMap = new Hashmap<Prefix, ArrayList<String>>();
+		searchMap = new HashMap<Prefix, ArrayList<String>>();
 		this.prefixLength = prefixLength;
-		currentPrefix = new Prefix(prefixLength, text, RANDOM_MODE);
 		this.textToHashmap(text);
+		// ***********************************D
+		System.out.println("DEBUG: after generate HashMap");
+		currentPrefix = new Prefix(prefixLength, text, RANDOM_MODE);
+		generator = new Random();
+		// ***********************************
 	}
 	
 
@@ -47,47 +57,55 @@ public class RandomTextGenerator {
 			if (searchMap.get(setupPrefix) == null) {
 				ArrayList<String> newValue = new ArrayList<String>();
 				newValue.add(nextWord);
-				searchMap.put(tempPrefix, newValue);
+				// ******************************D
+				System.out.println("DEBUG: First time next Word Array " + newValue.toString());
+				searchMap.put(setupPrefix, newValue);
 			}
 			else {
-				searchMap.put(tempPrefix, searchMap.get(tempPrefix).add(nextWord));	
+			    ArrayList<String> newValue = new ArrayList<String>();
+			    newValue = searchMap.get(setupPrefix);
+			    newValue.add(nextWord);
+			    // ******************************D
+			    System.out.println("DEBUG: Next time next word Array " + newValue.toString());
+				searchMap.put(setupPrefix, newValue);	
 			}
 
 			setupPrefix = setupPrefix.updatePrefix(nextWord);
 		}
-
-
 	}
 	
 	//look up current prefix,return the next word based on probability,
 	//construct a new prefix if we reach the end of file.
+	//precon: our prefix now is 100% in the text
 	public String generate(ArrayList<String> text) {
-		String nextWord;
-		if (searchMap.get(currentPrefix) == null) {
-			//Error how to make sure that our prefix is 100% in the text?
+		ArrayList<String> nextWordsArray = searchMap.get(currentPrefix);
+		//*****************************************************D
+		System.out.println("DEBUG: after search map once and get next words array");
+		if (nextWordsArray == null) {
+			System.out.println("DEBUG: next words array doesn't set up correctly");
 		}
-		else {
+		System.out.println("DEBUG: the next words array is " + nextWordsArray.toString());
+		
+		int indexNext = generator.nextInt(nextWordsArray.size());
+		String nextWord = nextWordsArray.get(indexNext);
+		
+		while (nextWord.equals("end of file")) {
+			currentPrefix = new Prefix(prefixLength, text, RANDOM_MODE);
 			nextWordsArray = searchMap.get(currentPrefix);
-			int indexNext = generator.nextInt(nextWordsArray.size());
+			indexNext = generator.nextInt(nextWordsArray.size());
 			nextWord = nextWordsArray.get(indexNext);
-			
-			while (nextWord.equals("end of file")) {
-				currentPrefix = new Prefix(prefixLength, text, RANDOM);
-				nextWordsArray = searchMap.get(currentPrefix);
-				int indexNext = generator.nextInt(nextWordsArray.size());
-				nextWord = nextWordsArray.get(indexNext);
-			}
-			currentPrefix = currentPrefix.updatePrefix(nextWord);
 		}
+		currentPrefix = currentPrefix.updatePrefix(nextWord);
 		return nextWord;
 	}
 
 	//I am consider can I use a keySet to find another? if we do so, when 
 	//we generate a prefix, it won't be of the probability in the text. 
 
-	private Random generator = new Random(); 
+	private Random generator; 
 	private int prefixLength;//do I really need to save this?
 	private Prefix currentPrefix;
-	private Map<Prefix, ArrayList<String>> searchMap;
-
+	private HashMap<Prefix, ArrayList<String>> searchMap;
+	public static final int RANDOM_MODE = 0;
+	public static final int SETUP_MODE = 1;
 }
