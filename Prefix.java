@@ -67,7 +67,7 @@ public class Prefix {
 		int hashCode = 0;
 		while (iter.hasNext()) {
 			String item = iter.next();
-			hashCode += (item.hashCode())*Math.pow(31, prefixLength);//magic number
+			hashCode += (item.hashCode())*Math.pow(2, prefixLength);//magic number
 		}
 		// *****************************D
 		System.out.println("DEBUG: hashcode for current prefix");
@@ -75,7 +75,8 @@ public class Prefix {
 	}
 
 	//equals method
-	public boolean equals(Prefix b) {
+	public boolean equals(Object obj) {
+	    Prefix b = (Prefix) obj;
 		if (this.currentPrefix.size() != b.currentPrefix.size()) {
 			return false;
 		}
