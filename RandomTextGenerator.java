@@ -12,7 +12,6 @@
 **/
 
 import java.util.ArrayList;
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -27,14 +26,14 @@ public class RandomTextGenerator {
 	}
 
 	//constructor
-	public RandomTextGenerator(int prefixLength, ArrayList<String> text) {
+	public RandomTextGenerator(int prefixLength, ArrayList<String> text, int debugMode) {
 		searchMap = new HashMap<Prefix, ArrayList<String>>();
 		this.prefixLength = prefixLength;
-		this.textToHashmap(text);
+		//this.textToHashmap(text, debugMode);
 		// ***********************************D
-		System.out.println("DEBUG: after generate HashMap");
-		currentPrefix = new Prefix(prefixLength, text, RANDOM_MODE);
-		generator = new Random();
+		// System.out.println("DEBUG: after generate HashMap");
+		currentPrefix = new Prefix(prefixLength, text, RANDOM_MODE, debugMode);
+		generator = (debugMode == 1) ? new Random(1) : new Random();
 		// ***********************************
 	}
 	
@@ -42,8 +41,8 @@ public class RandomTextGenerator {
 	//According to the prefixLength, we cut the text and generate
 	//a Hashmap with prefixes as Keyset. 
 	//precondiction: text.length >= prefixLength + 1;
-	public void textToHashmap(ArrayList<String> text) {
-		Prefix setupPrefix = new Prefix(prefixLength, text, SETUP_MODE);
+	public void textToHashmap(ArrayList<String> text, int debugMode) {
+		Prefix setupPrefix = new Prefix(prefixLength, text, SETUP_MODE, debugMode);
 
 		for (int i = prefixLength; i <= text.size(); i++ ) {
 			String nextWord;
@@ -58,7 +57,7 @@ public class RandomTextGenerator {
 				ArrayList<String> newValue = new ArrayList<String>();
 				newValue.add(nextWord);
 				// ******************************D
-				System.out.println("DEBUG: First time next Word Array " + newValue.toString());
+			//	System.out.println("DEBUG: First time next Word Array " + newValue.toString());
 				searchMap.put(setupPrefix, newValue);
 			}
 			else {
@@ -66,8 +65,8 @@ public class RandomTextGenerator {
 			    newValue = searchMap.get(setupPrefix);
 			    newValue.add(nextWord);
 			    // ******************************D
-			    System.out.println("DEBUG: Next time next word Array " + newValue.toString());
-				searchMap.put(setupPrefix, newValue);	
+			//    System.out.println("DEBUG: another time next word Array " + newValue.toString());
+			//	searchMap.put(setupPrefix, newValue);	
 			}
 
 			setupPrefix = setupPrefix.updatePrefix(nextWord);
@@ -77,24 +76,28 @@ public class RandomTextGenerator {
 	//look up current prefix,return the next word based on probability,
 	//construct a new prefix if we reach the end of file.
 	//precon: our prefix now is 100% in the text
-	public String generate(ArrayList<String> text) {
+	public String generate(ArrayList<String> text, int debugMode) {
+		if (debugMode == 1) {System.out.println("DEBUG: prefix: " + currentPrefix.toString());}
 		ArrayList<String> nextWordsArray = searchMap.get(currentPrefix);
 		//*****************************************************D
-		System.out.println("DEBUG: after search map once and get next words array");
-		if (nextWordsArray == null) {
-			System.out.println("DEBUG: next words array doesn't set up correctly");
-		}
-		System.out.println("DEBUG: the next words array is " + nextWordsArray.toString());
+		// System.out.println("DEBUG: after search map once and get next words array");
+		// if (nextWordsArray == null) {
+			// System.out.println("DEBUG: next words array doesn't set up correctly");
+		// }
+		if (debugMode == 1) {System.out.println("DEBUG: successors " + nextWordsArray.toString());}
 		
 		int indexNext = generator.nextInt(nextWordsArray.size());
 		String nextWord = nextWordsArray.get(indexNext);
 		
 		while (nextWord.equals("end of file")) {
-			currentPrefix = new Prefix(prefixLength, text, RANDOM_MODE);
+			currentPrefix = new Prefix(prefixLength, text, RANDOM_MODE, debugMode);
+			if (debugMode == 1) {System.out.println("DEBUG: prefix: " + currentPrefix.toString());}
 			nextWordsArray = searchMap.get(currentPrefix);
+			if (debugMode == 1) {System.out.println("DEBUG: successors " + nextWordsArray.toString());}
 			indexNext = generator.nextInt(nextWordsArray.size());
 			nextWord = nextWordsArray.get(indexNext);
 		}
+		if (debugMode == 1) {System.out.println("DEBUG: word generated: " + nextWord);}
 		currentPrefix = currentPrefix.updatePrefix(nextWord);
 		return nextWord;
 	}

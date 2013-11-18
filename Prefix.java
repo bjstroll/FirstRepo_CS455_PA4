@@ -12,23 +12,23 @@
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.LinkedList;
-import java.lang.Math;
 import java.util.ListIterator;
 
 public class Prefix {
 	//constructor, if the setup == 1, build the first sequence
 	//of prefix from the text in order to build map; if setup == 0
 	//build a random prefix from the text.
-	public Prefix(int prefixLength, ArrayList<String> text, int setup) {
+	public Prefix(int prefixLength, ArrayList<String> text, int setup, int debugMode) {
 		this.prefixLength = prefixLength;
 		currentPrefix = new LinkedList<String>();
+		generator = (debugMode == 1) ? new Random(1) : new Random();  
 
 		if (setup == 1) {
 			for (int i = 0; i < prefixLength; i++) {
 				currentPrefix.addLast(text.get(i));
 			}
 			//*******************************************************debug 
-			System.out.println("DEBUG: setup_mode, the initial prefix is " + currentPrefix.toString());
+			//if(debugMode == 1) {System.out.println("DEBUG: setup_mode, the initial prefix is " + currentPrefix.toString());}
 		}
 		else {
 			int indexInText = generator.nextInt(text.size() - prefixLength);
@@ -36,13 +36,14 @@ public class Prefix {
 				currentPrefix.addLast(text.get(i));
 			}
 			// *************************************************D
-			System.out.println("DEBUG: current prefix " + currentPrefix.toString());
+			if (debugMode == 1) {System.out.println("DEBUG: choose a new initial prefix: " + currentPrefix.toString());}
 
 		}
 	}
 
 	//default constructor
 	public Prefix() {
+		generator = new Random();
 		prefixLength = 1;
 		currentPrefix = new LinkedList<String>();//may redundant
 	}
@@ -57,7 +58,7 @@ public class Prefix {
 		prefix.currentPrefix.addLast(nextWord);
 		prefix.currentPrefix.removeFirst();
 		// ***********************************************D
-		System.out.println("DEBUG: current prefix " + currentPrefix.toString());
+		//System.out.println("DEBUG: Prefix after updated " + prefix.currentPrefix.toString());
 		return prefix;
 	}
 
@@ -65,12 +66,14 @@ public class Prefix {
 	public int hashCode() {
 		ListIterator<String> iter = currentPrefix.listIterator();
 		int hashCode = 0;
+		int temp = 1;
 		while (iter.hasNext()) {
 			String item = iter.next();
-			hashCode += (item.hashCode())*Math.pow(2, prefixLength);//magic number
+			hashCode += (item.hashCode())*temp;
+			temp++;//magic number
 		}
 		// *****************************D
-		System.out.println("DEBUG: hashcode for current prefix");
+		// System.out.println("DEBUG: hashcode for current prefix");
 		return hashCode;
 	}
 
@@ -84,7 +87,9 @@ public class Prefix {
 			ListIterator<String> iter1 = this.currentPrefix.listIterator();
 			ListIterator<String> iter2 = b.currentPrefix.listIterator();
 			while (iter1.hasNext()) {
-				if (!iter1.next().equals(iter2.next())) {
+			   String temp1 = iter1.next();
+			   String temp2 = iter2.next();
+				if (!temp1.equals(temp2)) {
 					 	return false;
 				} 
 			}
@@ -92,7 +97,12 @@ public class Prefix {
 		}
 	}
 
-	private Random generator = new Random();
+	//toString
+	public String toString() {
+		return currentPrefix.toString();
+	}
+
+	private Random generator;
 	private int prefixLength;
 	private LinkedList<String> currentPrefix;
 }

@@ -17,42 +17,47 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.lang.Integer;
 import java.io.File;
+import java.lang.NumberFormatException;
 
 public class GenText {
 
 	public static void main(String[] args) {
-		int prefixLength;
-		int numWords;
-		String sourceFile;
-		String outFile;
-		int debugMode = 0;//1 means in debugMode
-
-
-		if ((args.length != 4) && (args.length != 5)) {
-			System.out.println("ERROR: please enter appropriate arguments");
-			return ;
-		}
-
-		if (args[0].equals("-d")) {
-			debugMode = 1;
-		}
+		int debugMode = NON_DEBUG_MODE;//1 means in debugMode
 		try {
-			prefixLength = Integer.parseInt(args[0 + debugMode]);//exception handler needed
-			sourceFile = args[2 + debugMode];
-			outFile = args[3 + debugMode];//why can't write to output file
+			if (args[0].equals("-d")) {
+				debugMode = DEBUG_MODE;
+				if (args.length < 5) {
+					throw new ErrorArgsException("ERROR: missing command line arguments");
+				}	
+				else if (args.length > 5) {
+					throw new ErrorArgsException("ERROR: extra command line arguments");
+				}
+			}
+			else {
+				if (args.length < 4) {
+					throw new ErrorArgsException("ERROR: missing command line arguments");
+				}
+				else if (args.length > 4) {
+					throw new ErrorArgsException("ERROR: extra command line arguments");
+				}
+			}
+
+			int prefixLength = Integer.parseInt(args[0 + debugMode]);//NumberFormatException
+			int numWords = Integer.parseInt(args[1 + debugMode]);//NumberFormatException
+			String sourceFile = args[2 + debugMode];
+			String outFile = args[3 + debugMode];
 			readInText(sourceFile);
-			// ******************************************************
-			System.out.println("DEBUG: after readInText()");
-			System.out.println("Text: " + text.toString());
 
-			numWords = Integer.parseInt(args[1 + debugMode]);//exception
-
-			commandErrorCheck(prefixLength, numWords); //commandErrorCheck handle errors associated
+			commandError(prefixLength, numWords, args);
+							//commandErrorCheck handles errors associated
 													   //with prefixLength and numWorkds
 													   //sourceFile error handled by exception
-													   //outFile error handled by exception?
-			generateAndPrint(outFile, numWords, prefixLength);
-			System.out.println("Congratulations! DONE!");
+													   //outFile error handled by exception
+			generateAndPrint(outFile, numWords, prefixLength, debugMode);
+			// System.out.println("Congratulations! DONE!");
+		}
+		catch (NumberFormatException exception) {
+			System.out.println("ERROR: prefixLength or numWords arguments are not integers");
 		}
 		catch (IllegalArgumentException exception) {
 			System.out.println(exception.getMessage());
@@ -64,14 +69,14 @@ public class GenText {
 
 
 	//process command line ERROR
-	public static void commandErrorCheck(int prefixLength, int numWords) throws ErrorArgsException {
+	public static void commandError(int prefixLength, int numWords, String[] args) throws ErrorArgsException {
 		if (numWords < 0) {
 			throw new ErrorArgsException("ERROR: Number of words expected in output file is less than 0. Should be biiger or equal than 0");
 		}
 		if (prefixLength < 1) {
 			throw new ErrorArgsException("ERROR: prefix length is smaller than 1. Should be bigger or equal than 1"); 
 		}
-		if (prefixLength > text.size()) {
+		if (prefixLength >= text.size()) {
 			throw new ErrorArgsException("ERROR: prefix Length is bigger than the number of words in source text. Prefix length should be smaller than " + text.size());
 		}
 	}
@@ -97,9 +102,10 @@ public class GenText {
 
 	//print random text into output file
 	//" " + nextWord, so put fisrt word at first.
-	public static void generateAndPrint(String outFile, int numWords, int prefixLength) throws FileNotFoundException {
-		RandomTextGenerator textGenerator = new RandomTextGenerator(prefixLength, text);
-		String nextWord = textGenerator.generate(text);
+	public static void generateAndPrint(String outFile, int numWords, int prefixLength, int debugMode) throws FileNotFoundException {
+		RandomTextGenerator textGenerator = new RandomTextGenerator(prefixLength, text, debugMode);
+		textGenerator.textToHashmap(text, debugMode);
+		String nextWord = textGenerator.generate(text, debugMode);
 		int nextWordLength = nextWord.length();
 		try {
 			PrintWriter out = new PrintWriter(outFile);
@@ -109,14 +115,14 @@ public class GenText {
 					if (numCharsPerLine == 0) {
 						out.print(nextWord);
 						numCharsPerLine += nextWordLength;
-						nextWord = textGenerator.generate(text);
+						nextWord = textGenerator.generate(text, debugMode);
 						nextWordLength = nextWord.length();
 					}
 					else {
 						if ((numCharsPerLine + nextWordLength + 1) <= 80) {
 							out.print(" " + nextWord);
 							numCharsPerLine += nextWordLength + 1;
-							nextWord = textGenerator.generate(text);
+							nextWord = textGenerator.generate(text, debugMode);
 							nextWordLength = nextWord.length();
 						}
 						else {
@@ -136,4 +142,7 @@ public class GenText {
 	}
 
 	private static ArrayList<String> text = new ArrayList<String>();
+	public static final int DEBUG_MODE = 1;
+	public static final int NON_DEBUG_MODE = 0;
+	
 }
